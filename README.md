@@ -211,8 +211,6 @@ Configure in **Odoo → Settings → SafeO → Jira Integration** (URL, email, A
 ├── safeo_website/            # Vite + React (:5174)
 ├── safeo_sdk/python/         # /v1/scan client
 ├── docs/
-│   ├── demo.txt              # Live demo script + payloads
-│   ├── ppt.txt               # Pitch deck slides
 │   └── ARCHITECTURE.md
 └── scripts/run_all.sh
 ```
@@ -283,8 +281,6 @@ Copy `.env.example` → `backend/.env`:
 ---
 
 ## Demo flow (3 minutes)
-
-Full script: **[docs/demo.txt](docs/demo.txt)** · Slides: **[docs/ppt.txt](docs/ppt.txt)**
 
 | Step | Action | Expected |
 |------|--------|----------|
