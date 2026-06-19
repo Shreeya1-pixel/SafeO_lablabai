@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from .ws_broadcaster import broadcaster
-from ..agents.band_bridge import band_post
+from ..band.bridge import band_post
 
 
 def agent_name_to_key(agent_name: str) -> str:

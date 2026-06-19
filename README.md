@@ -8,6 +8,12 @@ SafeO intercepts untrusted text at application boundaries (ERP forms, REST paylo
 
 **Design constraint:** scoring and investigation run on **self-hosted inference** (heuristics + DistilBERT + optional local Mistral via vLLM). No OpenAI or commercial LLM API is required on the default path.
 
+```
+backend/   FastAPI decision engine + ML + agent orchestration
+frontend/  Odoo 19 module (demo UI) + Vite website
+band/      Band platform config, credentials, integration docs
+```
+
 ---
 
 ## Problem
@@ -46,14 +52,14 @@ flowchart TB
     subgraph Clients
         ODOO[Odoo 19 :8069<br/>securec_odoo]
         API[POST /v1/scan]
-        WEB[safeo_website :5174]
+        WEB[frontend/website :5174]
     end
 
     subgraph SafeO["FastAPI :8001"]
         SCORE[risk_scorer + tiered_llm]
         INV[investigation_room]
         WS[ws_broadcaster]
-        BB[band_bridge]
+        BB[band.bridge]
     end
 
     subgraph ML["core/ml"]
@@ -105,7 +111,7 @@ flowchart TB
 
 ## Band multi-agent layer
 
-Band is the **coordination bus** between investigation agents — not a post-hoc notification channel.
+Band is the **coordination bus** between investigation agents — not a post-hoc notification channel. Config and setup: [`band/README.md`](band/README.md). Runtime: `backend/safeo_backend/band/bridge.py`.
 
 ### Orchestration (`investigation_room.py`)
 
@@ -122,10 +128,10 @@ MultilingualAgent  (sequential, provides normalised_text)
 ```
 
 - `agent_post()` is **awaited** at each step so WebSocket buffer is populated before the investigation record is persisted (late-join clients get full replay).  
-- `band_bridge.band_post()` is fired via `asyncio.create_task` — Band latency never blocks the investigation pipeline.  
+- `band.bridge.band_post()` is fired via `asyncio.create_task` — Band latency never blocks the investigation pipeline.  
 - Band failures are swallowed; SafeO degrades to WebSocket + REST investigation API.
 
-### Band REST integration (`band_bridge.py`)
+### Band REST integration (`backend/safeo_backend/band/bridge.py`)
 
 | Step | API | Notes |
 |------|-----|-------|
@@ -252,29 +258,39 @@ Odoo is the **reference deployment** for hackathon demo — not a hard dependenc
 
 ## Repository layout
 
-```
-backend/safeo_backend/
-├── main.py                    # ASGI entry, startup Band init
-├── agents/
-│   ├── investigation_room.py  # Multi-agent orchestrator
-│   ├── band_bridge.py         # Band REST client layer
-│   ├── multilingual_agent.py
-│   ├── policy_agent.py
-│   ├── forensics_agent.py
-│   └── remediation_agent.py
-├── core/ml/
-│   ├── tiered_llm.py          # Tier routing logic
-│   ├── risk_scorer.py         # Tier 1 engine
-│   └── tier2_classifier.py    # DistilBERT
-├── routes/
-│   ├── universal.py           # /v1/scan
-│   └── investigations.py
-├── routers/ws.py              # WebSocket broadcaster
-└── middleware/auth.py         # Bearer gate on /v1/*
+Three top-level packages — **backend**, **frontend**, **band**:
 
-odoo_module/securec_odoo/      # Odoo 19 addon (demo UI)
-safeo_website/                 # Vite + React status dashboard
-safeo_sdk/python/              # HTTP client wrapper
+```
+SafeO_lablabai/
+├── README.md
+├── .env.example              # All env vars — copy to backend/.env
+├── odoo.conf.example
+│
+├── backend/                  # FastAPI decision engine (:8001)
+│   ├── README.md
+│   ├── requirements.txt
+│   ├── scripts/run_all.sh
+│   ├── amd_setup/            # Optional ROCm + vLLM
+│   ├── sdk/python/           # SafeOClient
+│   └── safeo_backend/
+│       ├── main.py
+│       ├── agents/           # investigation_room, policy, forensics, …
+│       ├── band/               # Band REST bridge (band-sdk)
+│       ├── core/ml/            # tiered_llm, risk_scorer, tier2_classifier
+│       ├── routes/             # universal (/v1), erp, investigations
+│       └── routers/ws.py
+│
+├── frontend/                 # Demo UI
+│   ├── README.md
+│   ├── odoo_module/          # Odoo 19 addon (securec_odoo) — :8069
+│   └── website/              # Vite + React — :5174
+│
+├── band/                     # Band platform config + docs
+│   ├── README.md
+│   ├── config.yaml           # Agent registry template
+│   └── env.example           # Band credential template
+│
+└── docs/ARCHITECTURE.md
 ```
 
 ---
@@ -301,19 +317,19 @@ Verify: `curl -H "Authorization: Bearer internal" http://127.0.0.1:8001/v1/healt
 ### 2. Odoo (demo UI)
 
 ```bash
-# Copy odoo.conf.example → your Odoo install
-# addons_path must include: /path/to/repo/odoo_module
+# odoo.conf addons_path must include:
+# /path/to/repo/frontend/odoo_module
 ./venv/bin/python odoo-bin -c odoo.conf --http-port=8069
 ```
 
 Install `securec_odoo` · Settings → API URL `http://127.0.0.1:8001` · Jira credentials optional.
 
-Dashboard: http://127.0.0.1:8069/odoo/safeo
+Dashboard: http://127.0.0.1:8069/odoo/safeo — see [`frontend/README.md`](frontend/README.md)
 
 ### 3. Website (optional)
 
 ```bash
-cd safeo_website && npm install && npm run dev
+cd frontend/website && npm install && npm run dev
 # http://localhost:5174
 ```
 

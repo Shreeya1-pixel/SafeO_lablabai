@@ -1,23 +1,52 @@
-# SafeO — Frontend (dashboard UI)
+# Frontend — Demo UI
 
-The **operator dashboard** is not a separate SPA: it ships as an **Odoo 19 OWL** app inside the integration module.
+Two surfaces share the same FastAPI backend on port **8001**.
 
-## Where the UI lives
+## Structure
 
-| Asset | Path |
-|--------|------|
-| OWL component (logic) | `../odoo_module/securec_odoo/static/src/js/dashboard.js` |
-| OWL template (XML) | `../odoo_module/securec_odoo/static/src/xml/securec_dashboard.xml` |
-| Styles | `../odoo_module/securec_odoo/static/src/css/securec.css` |
-| Menu / client action | `../odoo_module/securec_odoo/views/securec_dashboard_views.xml` |
+```
+frontend/
+├── odoo_module/              # Odoo 19 addon (securec_odoo) — primary demo
+│   └── securec_odoo/
+│       ├── static/src/js/dashboard.js
+│       ├── static/src/xml/securec_dashboard.xml
+│       └── controllers/main.py
+└── website/                  # Vite + React standalone (:5174)
+    ├── src/pages/Dashboard.jsx
+    └── vite.config.js
+```
 
-## How to “run” the frontend
+## 1. Odoo dashboard (main hackathon demo)
 
-1. Start the **backend** (`SafeO/scripts/run_all.sh` or `uvicorn` — see main README).
-2. Start **Odoo** with `addons_path` including `SafeO/odoo_module`.
-3. Log in → open **SafeO** app → **Business Risk Dashboard**.
+**Port:** 8069
+
+```bash
+# odoo.conf addons_path must include:
+# /path/to/repo/frontend/odoo_module
+./venv/bin/python odoo-bin -c odoo.conf --http-port=8069
+```
+
+Install `securec_odoo` → Settings → API URL `http://127.0.0.1:8001`
+
+| URL | Tab |
+|-----|-----|
+| http://127.0.0.1:8069/odoo/safeo | Dashboard |
+| Sandbox | Live payload injection |
+| Investigations | WebSocket agent timeline |
+| Risk → Action | Jira escalation panel |
+
+## 2. Standalone website
+
+**Port:** 5174
+
+```bash
+cd frontend/website
+npm install && npm run dev
+```
+
+Open http://localhost:5174 — backend/Odoo health cards + connect flow.
 
 ## API URL
 
-The module reads `securec.api_url` from Odoo settings (default `http://localhost:8001`).  
-JSON-RPC routes on Odoo (`/safeo/*`) proxy to that URL.
+Odoo reads `securec.api_url` from Settings (default `http://127.0.0.1:8001`).  
+JSON-RPC routes `/safeo/*` proxy to the backend.

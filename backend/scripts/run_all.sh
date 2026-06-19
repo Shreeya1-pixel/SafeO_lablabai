@@ -4,15 +4,15 @@
 
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$ROOT/backend"
+cd "$ROOT"
 
 if [[ ! -d .venv ]]; then
   echo "No .venv found. Create one and install deps:"
-  echo "  cd SafeO/backend && python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt"
+  echo "  cd backend && python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt"
   exit 1
 fi
 
-export PYTHONPATH="${ROOT}/backend${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH="${ROOT}${PYTHONPATH:+:$PYTHONPATH}"
 echo "Starting SafeO API on http://127.0.0.1:8001 (Swagger: /docs)"
-echo "In another terminal: start Odoo with addons-path including SafeO/odoo_module"
+echo "In another terminal: start Odoo with addons-path including frontend/odoo_module"
 exec .venv/bin/python -m uvicorn safeo_backend.main:app --host 127.0.0.1 --port 8001 --reload

@@ -97,7 +97,7 @@ def _startup_summary() -> None:
     except Exception:
         pass
 
-    from .agents.band_bridge import BAND_ENABLED, _band_agents
+    from .band.bridge import BAND_ENABLED, _band_agents
     if BAND_ENABLED:
         band_status = f"enabled, {len(_band_agents)} agents connected"
     else:
@@ -131,7 +131,7 @@ async def on_startup():
         register_model("arabert-multilingual")
     except Exception:
         pass
-    from .agents.band_bridge import BAND_ENABLED, _init_band_agents
+    from .band.bridge import BAND_ENABLED, _init_band_agents
     if BAND_ENABLED:
         asyncio.create_task(_init_band_agents())
     _startup_summary()

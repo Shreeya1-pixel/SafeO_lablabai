@@ -192,9 +192,9 @@ async def v1_health():
     except Exception:
         pass
 
-    from ..agents.band_bridge import BAND_ENABLED, _band_agents
+    from ..band.bridge import BAND_ENABLED, _band_agents
     if BAND_ENABLED and not _band_agents:
-        from ..agents.band_bridge import _init_band_agents
+        from ..band.bridge import _init_band_agents
         asyncio.create_task(_init_band_agents())
 
     return {
