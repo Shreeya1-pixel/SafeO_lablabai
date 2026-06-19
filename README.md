@@ -369,7 +369,7 @@ curl -s http://127.0.0.1:8001/ml/tier-stats | python3 -m json.tool
 
 ---
 
-## Demo checklist (judges)
+## Demo checklist 
 
 | # | Action | Expected result |
 |---|--------|-----------------|
