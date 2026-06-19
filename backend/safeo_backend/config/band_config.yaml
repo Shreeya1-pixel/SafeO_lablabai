@@ -1,0 +1,12 @@
+multilingual_agent:
+  agent_id: "${BAND_MULTILINGUAL_AGENT_ID}"
+  api_key: "${BAND_MULTILINGUAL_API_KEY}"
+policy_agent:
+  agent_id: "${BAND_POLICY_AGENT_ID}"
+  api_key: "${BAND_POLICY_API_KEY}"
+forensics_agent:
+  agent_id: "${BAND_FORENSICS_AGENT_ID}"
+  api_key: "${BAND_FORENSICS_API_KEY}"
+remediation_agent:
+  agent_id: "${BAND_REMEDIATION_AGENT_ID}"
+  api_key: "${BAND_REMEDIATION_API_KEY}"
